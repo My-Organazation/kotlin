@@ -17,6 +17,8 @@
 package org.jetbrains.kotlin.noarg
 
 import com.intellij.mock.MockProject
+import com.intellij.openapi.project.Project
+import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.codegen.extensions.ExpressionCodegenExtension
 import org.jetbrains.kotlin.compiler.plugin.*
 import org.jetbrains.kotlin.config.CompilerConfiguration
@@ -66,7 +68,7 @@ class NoArgCommandLineProcessor : CommandLineProcessor {
             required = false, allowMultipleOccurrences = false
         )
 
-        val PLUGIN_ID = "org.jetbrains.kotlin.noarg"
+        const val PLUGIN_ID = "org.jetbrains.kotlin.noarg"
     }
 
     override val pluginId = PLUGIN_ID
@@ -82,16 +84,21 @@ class NoArgCommandLineProcessor : CommandLineProcessor {
 
 class NoArgComponentRegistrar : ComponentRegistrar {
     override fun registerProjectComponents(project: MockProject, configuration: CompilerConfiguration) {
-        val annotations = configuration.get(ANNOTATION)?.toMutableList() ?: mutableListOf()
+        val annotations = configuration.get(ANNOTATION).orEmpty().toMutableList()
         configuration.get(PRESET)?.forEach { preset ->
             SUPPORTED_PRESETS[preset]?.let { annotations += it }
         }
-        if (annotations.isEmpty()) return
+        if (annotations.isNotEmpty()) {
+            registerNoargComponents(project, annotations, configuration.getBoolean(INVOKE_INITIALIZERS))
+        }
+    }
 
-        StorageComponentContainerContributor.registerExtension(project, CliNoArgComponentContainerContributor(annotations))
-
-        val invokeInitializers = configuration[INVOKE_INITIALIZERS] ?: false
-        ExpressionCodegenExtension.registerExtension(project, CliNoArgExpressionCodegenExtension(annotations, invokeInitializers))
+    internal companion object {
+        fun registerNoargComponents(project: Project, annotations: List<String>, invokeInitializers: Boolean) {
+            StorageComponentContainerContributor.registerExtension(project, CliNoArgComponentContainerContributor(annotations))
+            ExpressionCodegenExtension.registerExtension(project, CliNoArgExpressionCodegenExtension(annotations, invokeInitializers))
+            IrGenerationExtension.registerExtension(project, NoArgIrGenerationExtension(annotations, invokeInitializers))
+        }
     }
 }
 

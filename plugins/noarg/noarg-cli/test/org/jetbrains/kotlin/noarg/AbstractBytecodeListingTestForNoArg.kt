@@ -18,8 +18,6 @@ package org.jetbrains.kotlin.noarg
 
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.codegen.AbstractBytecodeListingTest
-import org.jetbrains.kotlin.codegen.extensions.ExpressionCodegenExtension
-import org.jetbrains.kotlin.extensions.StorageComponentContainerContributor
 
 abstract class AbstractBytecodeListingTestForNoArg : AbstractBytecodeListingTest() {
     internal companion object {
@@ -27,8 +25,6 @@ abstract class AbstractBytecodeListingTestForNoArg : AbstractBytecodeListingTest
     }
 
     override fun setupEnvironment(environment: KotlinCoreEnvironment) {
-        val project = environment.project
-        StorageComponentContainerContributor.registerExtension(project, CliNoArgComponentContainerContributor(NOARG_ANNOTATIONS))
-        ExpressionCodegenExtension.registerExtension(project, CliNoArgExpressionCodegenExtension(NOARG_ANNOTATIONS, false))
+        NoArgComponentRegistrar.registerNoargComponents(environment.project, NOARG_ANNOTATIONS, false)
     }
 }

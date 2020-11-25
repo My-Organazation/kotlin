@@ -148,6 +148,8 @@ import org.jetbrains.kotlin.nj2k.inference.mutability.AbstractMutabilityInferenc
 import org.jetbrains.kotlin.nj2k.inference.nullability.AbstractNullabilityInferenceTest
 import org.jetbrains.kotlin.noarg.AbstractBlackBoxCodegenTestForNoArg
 import org.jetbrains.kotlin.noarg.AbstractBytecodeListingTestForNoArg
+import org.jetbrains.kotlin.noarg.AbstractIrBlackBoxCodegenTestForNoArg
+import org.jetbrains.kotlin.noarg.AbstractIrBytecodeListingTestForNoArg
 import org.jetbrains.kotlin.parcelize.test.AbstractParcelizeBoxTest
 import org.jetbrains.kotlin.parcelize.test.AbstractParcelizeBytecodeListingTest
 import org.jetbrains.kotlin.parcelize.test.AbstractParcelizeIrBoxTest
@@ -1189,12 +1191,14 @@ fun main(args: Array<String>) {
 
         testGroup("plugins/noarg/noarg-cli/test", "plugins/noarg/noarg-cli/testData") {
             testClass<AbstractBytecodeListingTestForNoArg> {
-                model("bytecodeListing", extension = "kt")
+                model("bytecodeListing", extension = "kt", targetBackend = TargetBackend.JVM)
+            }
+            testClass<AbstractIrBytecodeListingTestForNoArg> {
+                model("bytecodeListing", extension = "kt", targetBackend = TargetBackend.JVM_IR)
             }
 
-            testClass<AbstractBlackBoxCodegenTestForNoArg> {
-                model("box", targetBackend = TargetBackend.JVM)
-            }
+            testClass<AbstractBlackBoxCodegenTestForNoArg> { model("box", targetBackend = TargetBackend.JVM) }
+            testClass<AbstractIrBlackBoxCodegenTestForNoArg> { model("box", targetBackend = TargetBackend.JVM_IR) }
         }
 
         testGroup("plugins/sam-with-receiver/sam-with-receiver-cli/test", "plugins/sam-with-receiver/sam-with-receiver-cli/testData") {

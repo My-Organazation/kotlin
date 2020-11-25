@@ -6,16 +6,15 @@
 package org.jetbrains.kotlin.noarg
 
 import org.jetbrains.kotlin.codegen.AbstractBlackBoxCodegenTest
-import org.jetbrains.kotlin.codegen.extensions.ExpressionCodegenExtension
-import org.jetbrains.kotlin.extensions.StorageComponentContainerContributor.Companion.registerExtension
 import org.jetbrains.kotlin.noarg.AbstractBytecodeListingTestForNoArg.Companion.NOARG_ANNOTATIONS
 
 abstract class AbstractBlackBoxCodegenTestForNoArg : AbstractBlackBoxCodegenTest() {
     override fun loadMultiFiles(files: MutableList<TestFile>) {
-        val project = myEnvironment.project
-        registerExtension(project, CliNoArgComponentContainerContributor(NOARG_ANNOTATIONS))
-        val invokeInitializers = files.any { "// INVOKE_INITIALIZERS" in it.content }
-        ExpressionCodegenExtension.registerExtension(project, CliNoArgExpressionCodegenExtension(NOARG_ANNOTATIONS, invokeInitializers))
+        NoArgComponentRegistrar.registerNoargComponents(
+            myEnvironment.project,
+            NOARG_ANNOTATIONS,
+            files.any { it.directives.contains("INVOKE_INITIALIZERS") },
+        )
 
         super.loadMultiFiles(files)
     }
